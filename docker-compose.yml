@@ -24,7 +24,7 @@ services:
     networks: ['stack']
     # Check that Elasticsearch is responding before hitting it with real requests.
     healthcheck:
-      test: ['CMD', 'curl', '-f', '-u', 'elastic:changeme', 'http://localhost:9200']
+      test: ['CMD', 'curl', '-f', '-u', 'docker:changeme', 'http://localhost:9200']
 
   kibana:
     image: docker.elastic.co/kibana/kibana:${TAG}
@@ -97,7 +97,7 @@ services:
         -beat ""
         -file /usr/share/metricbeat/beats-dashboards-${ELASTIC_VERSION}.zip
         -es http://elasticsearch:9200
-        -user elastic
+        -user docker
         -pass changeme
     depends_on: {kibana: {condition: service_healthy}}
 
@@ -108,7 +108,7 @@ services:
     networks: ['stack']
     # There's currently no API for creating index patterns, so this is a bit hackish.
     command: >-
-      curl -XPUT http://elastic:changeme@elasticsearch:9200/.kibana/index-pattern/logstash-*
+      curl -XPUT http://docker:changeme@elasticsearch:9200/.kibana/index-pattern/logstash-*
         -d '{"title" : "logstash-*",  "timeFieldName": "@timestamp"}'
     depends_on: {kibana: {condition: service_healthy}}
 
@@ -116,7 +116,7 @@ services:
     image: docker.elastic.co/beats/metricbeat:${TAG}
     networks: ['stack']
     command: >-
-      curl -XPUT http://elastic:changeme@elasticsearch:9200/.kibana/config/${ELASTIC_VERSION}
+      curl -XPUT http://docker:changeme@elasticsearch:9200/.kibana/config/${SHORT_VERSION}
         -d '{"defaultIndex" : "metricbeat-*"}'
     depends_on: {kibana: {condition: service_healthy}}
 
